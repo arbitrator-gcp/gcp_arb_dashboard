@@ -12,6 +12,9 @@
 # below:
 .git
 .gitignore
+.pyc
+.env
+.vscode
 
 node_modules
 #!include:.gitignore
