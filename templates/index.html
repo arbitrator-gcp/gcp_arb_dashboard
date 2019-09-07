@@ -7,8 +7,12 @@
 		<meta name="keywords" content="">
 		<meta name="author" content="">
 		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
 
-		<link href="static/css/main.css" rel="stylesheet" type="text/css" />
+		<!-- <link href="static/css/main.css" rel="stylesheet" type="text/css" /> -->
 
 		<!-- SUPPORT FOR IE6-8 OF HTML5 ELEMENTS -->
 		<!--[if lt IE 9]>
@@ -22,16 +26,34 @@
 	</head>
 
 	<body>
-		<div><p>{{ msg }}</p></div>
-		<div id={{ h_chart_id|safe }} class="chart" style="height: 500px; width: 100%"></div>
+		<div class="container-fluid" style="background-color:lavender;">
+				<h1>The Arbitrator</h1>
+				<div class="row">
+						<div class="col-sm-6">
+							<div class="col-sm-3" style="background-color:white;padding: 5px">Arbitrage (uncorrected): {{ arb|safe }}</div>
+							<div class="col-sm-3" style="background-color:white;padding: 5px">Rate (ZAR:EUR): {{ rate|safe }}</div>
+						<div class="col-sm-6">
+							<div class="col-sm-3" style="background-color:white;padding: 5px">Luno price (ZAR): {{ luno|safe }}</div>
+							<div class="col-sm-3" style="background-color:white;padding: 5px">Kraken price (ZAR): {{ kraken|safe }}</div>							
+						</div>
+						<div id="{{ h_arb_idv|safe }}" class="container-fluid" style="padding: 5px"></div>
+						<div id="{{ h_prices_idv|safe }}" class="container-fluid" style="padding: 5px"></div>
+				</div>
+		</div>
 		<script>
-			var h_chart_id = {{ h_chart_id|safe }}
-			var h_series = {{ h_series|safe }}
-			var h_title = {{ h_title|safe }}
-			var h_xAxis = {{ h_xAxis|safe }}
-			var h_yAxis = {{ h_yAxis|safe }}
-			var h_chart = {{ h_chart|safe }}
-			var h_plotOptions = {{ h_plotOptions|safe }}
+			var h_arb_idv = {{ h_arb_idv|safe }}
+			var h_arb_data = {{ h_arb_data|safe }}
+			var h_arb_title = {{ h_arb_title|safe }}
+			var h_arb_xAxis = {{ h_arb_xAxis|safe }}
+			var h_arb_yAxis = {{ h_arb_yAxis|safe }}
+			var h_arb_chart = {{ h_arb_chart|safe }}
+			
+			var h_prices_idv = {{ h_prices_idv|safe }}
+			var h_prices_data = {{ h_prices_data|safe }}
+			var h_prices_title = {{ h_prices_title|safe }}
+			var h_prices_xAxis = {{ h_prices_xAxis|safe }}
+			var h_prices_yAxis = {{ h_prices_yAxis|safe }}
+			var h_prices_chart = {{ h_prices_chart|safe }}
 		</script>
 		<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
 		<script src="https://code.highcharts.com/highcharts.js"></script>
