@@ -14,7 +14,10 @@ $(document).ready(function() {
         title: h_arb_title,
         xAxis: h_arb_xAxis,
         yAxis: h_arb_yAxis,
-        series: h_arb_data
+        series: h_arb_data,
+        tooltip: {split: true,
+            valueSuffix: `%`,
+        }
     });
 });
 

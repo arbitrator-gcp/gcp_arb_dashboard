@@ -1,36 +1,51 @@
 from flask import Flask, render_template, make_response
 import json
 from google.cloud import firestore
+import datetime as dt
 
 def dashboard(request):
-    # queries to get most up to date values
+    local = False
+    if local:
+        # local
+        curr_rate = 16.3
+        curr_kraken_euro = 9500
+        curr_kraken_zar = curr_kraken_euro * curr_rate
+        curr_luno = 165000
+        curr_ts = dt.datetime.now()
 
-    fs_client = firestore.Client()
-    q_fs_rate = fs_client.collection(u'rates').order_by(u'timestamp', direction=firestore.Query.DESCENDING).limit(1).get()
-    curr_rate = list({doc.to_dict()["EUR"] for doc in q_fs_rate})[0]
-    # curr_ts = list({doc.to_dict()["timestamp"] for doc in q_fs_rate})[0]
+        # local
+        with open("static/data/data2.json", "r") as f:
+            data = json.load(f)
+        series = data["data"]["series"]
+    else:
+        # Remote
+        # Query FS to get current point values
+        fs_client = firestore.Client()
+        # Rate and date
+        q_fs_rate = fs_client.collection(u'rates').order_by(u'timestamp', direction=firestore.Query.DESCENDING).limit(1).get()
+        rates = {"rates":{key:doc.to_dict()[key] for key in ["EUR", "timestamp"]} for doc in q_fs_rate}["rates"]
+        curr_rate = 1 / rates["EUR"]
+        curr_ts = rates["timestamp"]
+        # kraken
+        q_fs_kraken = fs_client.collection(u'kraken').order_by(u'timestamp', direction=firestore.Query.DESCENDING).limit(1).get()
+        curr_kraken_euro = list({doc.to_dict()["result_price_last"] for doc in q_fs_kraken})[0]
+        curr_kraken_zar = curr_kraken_euro * curr_rate
+        # Luno
+        q_fs_luno = fs_client.collection(u'luno').order_by(u'timestamp', direction=firestore.Query.DESCENDING).limit(1).get()
+        curr_luno = list({doc.to_dict()["result_price_last"] for doc in q_fs_luno})[0]
 
-    q_fs_kraken = fs_client.collection(u'kraken').order_by(u'timestamp', direction=firestore.Query.DESCENDING).limit(1).get()
-    curr_kraken = list({doc.to_dict()["result_price_last"] for doc in q_fs_kraken})[0] * (1/curr_rate)
+        # Query the hourly cache data:
+        # Remote
+        q_fs = fs_client.collection(u'cache').order_by(u'timestamp_ms', direction=firestore.Query.DESCENDING).limit(1).get()
+        series = {"data": {key:doc.to_dict()[key] for key in doc.to_dict().keys()} for doc in q_fs}["data"]["series"]
 
-    q_fs_luno = fs_client.collection(u'luno').order_by(u'timestamp', direction=firestore.Query.DESCENDING).limit(1).get()
-    curr_luno = list({doc.to_dict()["result_price_last"] for doc in q_fs_luno})[0]
+    curr_data = {"ts":str(curr_ts), "luno":round(curr_luno,2), "krakene":round(curr_kraken_euro,2), "krakenz":round(curr_kraken_zar,2), "arb":round(((curr_luno-curr_kraken_zar)/curr_kraken_zar)*100, 2), "rate":round(curr_rate, 2)  }
 
-    curr_data = {"luno":round(curr_luno,2), "kraken":round(curr_kraken,2), "arb":round(((curr_luno-curr_kraken)/curr_kraken)*100, 2), "rate":round(curr_rate, 2)  }
-
-
-    file_js = open("static/js/main.js","r")  
-    main_js = file_js.read()
-
-    # API query should return:
-    # get most recent FS cache record
-    q_fs = fs_client.collection(u'cache').order_by(u'timestamp_ms', direction=firestore.Query.DESCENDING).limit(1).get()
-    # dict_tmp = {doc.to_dict()["kraken"] for doc in q_fs}
-    series = json.dumps({"data": {key:doc.to_dict()[key] for key in doc.to_dict().keys()} for doc in q_fs})["data"]["series"]
-
-    # with open("static/data/data2.json", "r") as f:
-    #     data = json.load(f)
-    # series = data["data"]["series"]
+    # Load the js file for html injection
+    file_js = open("static/js/charts.js","r")  
+    charts_js = file_js.read()
+    file_js = open("static/js/form_calcs.js","r")  
+    calcs_js = file_js.read()
     
     # Hourly prices line chart
     h_prices_id = "h_prices_id"
@@ -74,5 +89,5 @@ def dashboard(request):
         'Access-Control-Allow-Methods': '*'
     }
 
-    resp = make_response(render_template("index.html", js=main_js, msg="hello", **curr_data, **h_prices_params, **h_arb_params))
+    resp = make_response(render_template("index.html", charts_js=charts_js, calcs_js=calcs_js, msg="hello", **curr_data, **h_prices_params, **h_arb_params))
     return(resp, 200, headers)
