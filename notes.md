@@ -5,4 +5,5 @@ pip install -r requirements.txt
 
 
 gcloud functions deploy dashboard --memory=256MB --runtime python37 --trigger-http
-	
+
+test
