@@ -27,8 +27,8 @@
 			<h1>The Arbitrator 0.1</h1>
 			<div class="row">
 				<div class="col" style="background-color:white;padding: 5px">Query datetime: {{ ts|safe }}</div>
-				<div class="col" style="background-color:white;padding: 5px">Arbitrage (uncorrected): {{ arb|safe }}</div>
-				<div class="col" style="background-color:white;padding: 5px">Rate (ZAR:EUR): {{ rate|safe }}</div>
+				<div class="col" style="background-color:white;padding: 5px">Arbitrage (no fees): {{ arb|safe }}</div>
+				<div class="col" style="background-color:white;padding: 5px">Rate (ZAR:EUR, padded): {{ rate_padded|safe }}</div>
 				<div class="col" style="background-color:white;padding: 5px">Luno price (ZAR): {{ luno|safe }}</div>
 				<div class="col" style="background-color:white;padding: 5px">Kraken price (ZAR): {{ krakenz|safe }}</div>							
 			</div>
@@ -55,7 +55,7 @@
 					<label >Capital investment (ZAR)</label>
 					<input type="text" id="capital_investment" name="capital_investment" value=50000.00 onchange="capital_investment_change()"/></br>
 					<label >Local bank charges (ZAR)</label>
-					<input type="text" id="local_charges" name="local_charges"/> (<a href="https://www.fnb.co.za/downloads/pricing-guide/products/FNB_PricingGuide_Forex.pdf" target="_blank">fnb</a>)</br>
+					<input type="text" id="local_charges" name="local_charges" onchange="returns_update()"/> (<a href="https://www.fnb.co.za/downloads/pricing-guide/products/FNB_PricingGuide_Forex.pdf" target="_blank">fnb</a>)</br>
 					<label >Swift fees (ZAR)</label>
 					<input type="text" id="swift_fees" name="swift_fees" value = 150.00 onchange="returns_update()"/> (<a href="https://www.fnb.co.za/downloads/pricing-guide/products/FNB_PricingGuide_Forex.pdf" target="_blank">fnb</a>)</br>
 					<label >Remote charges (ZAR)</label>
@@ -65,7 +65,7 @@
 					<label >Luno trade fees (%)</label>
 					<input type="text" id="luno_trade_fees" name="luno_trade_fees" value = 1.0 onchange="returns_update()"/></br>
 					<label >Luno withdrawel fees (ZAR)</label>
-					<input type="text" id="luno_withdraw_fees" name="luno_withdraw_fees" value = 8.50 onchange="returns_update()" readonly/></br>
+					<input type="text" id="luno_withdraw_fees" name="luno_withdraw_fees" value = 8.50 onchange="returns_update()"/></br>
 				</div>
 				<div class="col"></div>
 					<h4>Returns:</h4>
@@ -179,6 +179,7 @@
 				var kraken = parseFloat(document.getElementById(`krakene`).value);
 				var luno = parseFloat(document.getElementById(`luno`).value);
 				var local_charges = parseFloat(document.getElementById(`local_charges`).value);
+				var remote_charges = parseFloat(document.getElementById(`remote_charges`).value);
 				var swift_fees = parseFloat(document.getElementById(`swift_fees`).value);
 				var kraken_trade_fees = parseFloat(document.getElementById(`kraken_trade_fees`).value);
 				var luno_trade_fees = parseFloat(document.getElementById(`luno_trade_fees`).value);
@@ -201,10 +202,10 @@
 				// moving from Luno to bank incurs an R8.50 fee
 				var zar_less_withdraw_fee = zar - luno_withdraw_fee
 				// finally account for initial bank charges
-				var ret = zar_less_withdraw_fee - cap - local_charges - swift_fees
+				var ret = zar_less_withdraw_fee - cap - local_charges - swift_fees - remote_charges
 				var arb_adj = (ret/cap)*100
 				
-				document.getElementById(`arb_adj`).value = arb_adj.toFixed(2);
+				document.getElementById(`arb_adj`).value = arb_adj;
 				document.getElementById(`remote_btc`).value = btc.toFixed(2);
 				document.getElementById(`ret`).value = ret.toFixed(2);
 			};		

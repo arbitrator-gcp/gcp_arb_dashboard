@@ -8,11 +8,11 @@ def dashboard(request):
     if local:
         # local
         curr_rate = 16.3
+        padded_rate = curr_rate + 0.44
         curr_kraken_euro = 9500
-        curr_kraken_zar = curr_kraken_euro * curr_rate
+        curr_kraken_zar = curr_kraken_euro * padded_rate
         curr_luno = 165000
         curr_ts = dt.datetime.now()
-
         # local
         with open("static/data/data2.json", "r") as f:
             data = json.load(f)
@@ -25,11 +25,12 @@ def dashboard(request):
         q_fs_rate = fs_client.collection(u'rates').order_by(u'timestamp', direction=firestore.Query.DESCENDING).limit(1).get()
         rates = {"rates":{key:doc.to_dict()[key] for key in ["EUR", "timestamp"]} for doc in q_fs_rate}["rates"]
         curr_rate = 1 / rates["EUR"]
+        padded_rate = curr_rate + 0.44
         curr_ts = rates["timestamp"]
         # kraken
         q_fs_kraken = fs_client.collection(u'kraken').order_by(u'timestamp', direction=firestore.Query.DESCENDING).limit(1).get()
         curr_kraken_euro = list({doc.to_dict()["result_price_last"] for doc in q_fs_kraken})[0]
-        curr_kraken_zar = curr_kraken_euro * curr_rate
+        curr_kraken_zar = curr_kraken_euro * padded_rate
         # Luno
         q_fs_luno = fs_client.collection(u'luno').order_by(u'timestamp', direction=firestore.Query.DESCENDING).limit(1).get()
         curr_luno = list({doc.to_dict()["result_price_last"] for doc in q_fs_luno})[0]
@@ -39,7 +40,7 @@ def dashboard(request):
         q_fs = fs_client.collection(u'cache').order_by(u'timestamp_ms', direction=firestore.Query.DESCENDING).limit(1).get()
         series = {"data": {key:doc.to_dict()[key] for key in doc.to_dict().keys()} for doc in q_fs}["data"]["series"]
 
-    curr_data = {"ts":str(curr_ts), "luno":round(curr_luno,2), "krakene":round(curr_kraken_euro,2), "krakenz":round(curr_kraken_zar,2), "arb":round(((curr_luno-curr_kraken_zar)/curr_kraken_zar)*100, 2), "rate":round(curr_rate, 2)  }
+    curr_data = {"ts":str(curr_ts), "luno":round(curr_luno,2), "krakene":round(curr_kraken_euro,2), "krakenz":round(curr_kraken_zar,2), "arb":round(((curr_luno-curr_kraken_zar)/curr_kraken_zar)*100, 2), "rate":round(curr_rate, 2), "rate_padded":round(padded_rate, 2)  }
 
     # Load the js file for html injection
     file_js = open("static/js/charts.js","r")  

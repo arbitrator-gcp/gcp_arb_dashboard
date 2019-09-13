@@ -22,7 +22,7 @@ if IS_DEV:
     '''
 
     functions = ['dashboard']
-    # app.add_url_rule(f'/test_message', 'test_message', test_message, methods=['POST', 'GET'], defaults={'request': request})
+    # app.add_url_rule('/dashboard', dashboard, locals()[dashboard], methods=['POST', 'GET'], defaults={'request': request})
     for function in functions:
         app.add_url_rule(f'/{function}', function, locals()[function], methods=['POST', 'GET'], defaults={'request': request})
 

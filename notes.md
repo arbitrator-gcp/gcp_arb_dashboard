@@ -1,5 +1,5 @@
-python3.7 -m venv /home/phil/vscode_proj/flask_highcharts/.env
-source /home/phil/vscode_proj/flask_highcharts/.env/bin/activate
+python3.7 -m venv /home/phil/vscode_proj/gcp_arb_dashboard/.env
+source /home/phil/vscode_proj/gcp_arb_dashboard/.env/bin/activate
 
 pip install -r requirements.txt
 
